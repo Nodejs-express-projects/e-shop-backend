@@ -1,19 +1,16 @@
 const express = require('express')
 const app = express()
-const catrouter = require('./catalogRouter')
-
-const initializer = require('./initializers')
+const startcatalogrouter = require('./catalogRouter');
+const {logger} = require('./initializers')
+const startdatabase = require('./database/databaseConnectionClient')
 const router = express.Router();
-const PORT = 3000;
-const {logger,database} = initializer;
-database()
+const {PORT,MONGODB_URL=`mongodb://root:root@localhost:27017`} = process.env;
 
-catrouter(router);
-
-
+startdatabase(MONGODB_URL,logger);
+startcatalogrouter(router);
 
 app.use(router);
 
-app.listen(PORT,() => {
-    logger.info(`App listening to port,${PORT}`)
+app.listen(PORT || 3000,() => {
+    logger.info(`App listening to port,${PORT || 3000}`)
 })

@@ -1,14 +1,13 @@
 const winston = require('winston');
-const initializedatabase = require('./database/databaseConnectionClient')
+
 
 module.exports =  {
 
-    logger:initializelogging(),
-    database:initializedatabase()
+    logger:startlogging()
 
 }
 
-function initializelogging(){
+function startlogging(){
 
     const logger = winston.createLogger({
         level: 'info',

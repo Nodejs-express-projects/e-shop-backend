@@ -2,43 +2,56 @@ const { MongoClient } = require("mongodb");
 const { promisify } = require("util");
 const { logger } = require("../initializers");
 
-module.exports = function (url, logger) {
-  const client = createClient(url);
+module.exports = async function (url, logger) {
+  let client = null;
+  let db = null;
   try {
-    await checkconnection(client);
+    client = await checkconnection(url);
+    if (client) {
+      logger.info(`Database connection successful`);
+      db = await client.db("eshop"); //create database
+      createCollections(db);
+    }
   } catch (err) {
     logger.info(`Database connection closed due to err:,${err}`);
     await client.close();
+    throw err;
   }
 
-  const db = await client.db("eshop");
-
-  createCollections(db);
+  return db;
 };
 
-function checkconnection(client) {
-  await client.connect();
+async function checkconnection(url) {
+  return new Promise((resolve, reject) => {
+    MongoClient.connect(url, function (err, db) {
+      if (err) {
+        reject(err);
+      }
+      resolve(db);
+    });
+  });
 }
 
-function createClient(url) {
-  return new MongoClient(url);
-}
 
-function createCollections(database) {
+
+async function createCollections(database) {
   const createcollection = promisify(database.createCollection);
 
   try {
-    await createcollection("catalog");
-    logger.info("catalog Collection created");
+    database.createCollection("catalog", function (err, rep) {
+      logger.info("catalog Collection created");
+    });
 
-    await createcollection("subcatalog");
-    logger.info("subcatalog Collection created");
+    database.createCollection("subcatalog", function (err, rep) {
+      logger.info("subcatalog Collection created");
+    });
 
-    await createcollection("product");
-    logger.info("subcatalog Collection created");
+    database.createCollection("product", function (err, rep) {
+      logger.info("product Collection created");
+    });
   } catch (err) {
     logger.info("close database eshop");
-    db.close();
+    database.close();
     throw err;
   }
 }

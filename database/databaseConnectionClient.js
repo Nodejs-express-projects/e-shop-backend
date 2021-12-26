@@ -2,14 +2,14 @@ const { MongoClient } = require("mongodb");
 const { promisify } = require("util");
 const { logger } = require("../initializers");
 
-module.exports = async function (url, logger) {
+module.exports = async (url, logger) => {
   let client = null;
   let db = null;
   try {
     client = await checkconnection(url);
     if (client) {
       logger.info(`Database connection successful`);
-      db = await client.db("eshop"); //create database
+      db = await client.db("eshop"); //create database for multi tenant replace this database
       createCollections(db);
     }
   } catch (err) {
